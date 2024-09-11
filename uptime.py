@@ -102,12 +102,11 @@ def login():
         print(response.text)
         return None
 
-def post_thingboard(log_file_path):
+def post_thingboard(data):
     try:
         entityType = 'DEVICE'
         entityId = '953037d0-6f40-11ef-ada4-619820209fa2'
         scope = 'ANY'
-        data = publish_metrics(log_file_path)
         url = f'http://100.70.74.89:8080/api/plugins/telemetry/{entityType}/{entityId}/timeseries/{scope}'
         token = login()
         headers = {'accept': 'application/json', 'Content-Type': 'application/json', 'X-Authorization': f'Bearer {token}'}
@@ -126,7 +125,7 @@ if __name__ == "__main__":
                 publish_status()
                 data = publish_metrics(log_file_path)
                 client.publish(MQTT_TOPIC_STATUS, json.dumps(data))
-                post_thingboard(log_file_path)
+                post_thingboard(data)
                 print(data)
                 print("Metrics published successfully.")
             except Exception as e:
