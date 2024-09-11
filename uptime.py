@@ -113,6 +113,12 @@ def get_system_metrics():
     uptime = time.time() - psutil.boot_time()
     timestamp = datetime.now().isoformat()
     cpu_freq = psutil.cpu_freq()
+    uptime_seconds = time.time() - psutil.boot_time()
+    days = uptime_seconds // 86400
+    hours = (uptime_seconds % 86400) // 3600
+    minutes = (uptime_seconds % 3600) // 60
+    seconds = uptime_seconds % 60
+    uptime_formatted = f"{int(days):02}:{int(hours):02}:{int(minutes):02}:{int(seconds):02}"
 
     # แสดงความเร็ว CPU (MHz และแปลงเป็น GHz)
     current_speed_mhz = cpu_freq.current
@@ -120,7 +126,7 @@ def get_system_metrics():
     metrics = {
         'cpu_load': cpu_load,
         'ram_usage': ram_usage,
-        'uptime': uptime,
+        'uptime': uptime_formatted,
         'timestamp': timestamp,
         'CPU_GHz':current_speed_ghz
     }
