@@ -5,6 +5,7 @@ import time
 from datetime import datetime
 import requests
 import json
+import subprocess
 
 # MQTT broker details
 MQTT_BROKER = 'mqtt.nxge.co'
@@ -102,12 +103,32 @@ def login():
         print(response.text)
         return None
 
+def ping_server(host):
+    try:
+        output = subprocess.run(['ping', '-n', '1', host], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if "Request timed out" in output.stdout.decode():
+            print(f"Ping to {host} failed: Request timed out")
+            return False
+        else:
+            print(f"Ping to {host} successful")
+            return True
+    except Exception as e:
+        print(f"Error pinging server: {e}")
+        return False
+
 def post_thingboard(data):
     try:
         entityType = 'DEVICE'
         entityId = '953037d0-6f40-11ef-ada4-619820209fa2'
         scope = 'ANY'
-        url = f'http://100.70.74.89:8080/api/plugins/telemetry/{entityType}/{entityId}/timeseries/{scope}'
+        host = '100.70.74.89'
+        url = f'http://{host}:8080/api/plugins/telemetry/{entityType}/{entityId}/timeseries/{scope}'
+        
+        # Ping the server before making the request
+        if not ping_server(host):
+            print("Server is unreachable. Skipping ThingBoard posting.")
+            return
+        
         token = login()
         headers = {'accept': 'application/json', 'Content-Type': 'application/json', 'X-Authorization': f'Bearer {token}'}
         response = requests.post(url, json=data, headers=headers)
@@ -117,7 +138,7 @@ def post_thingboard(data):
         print(f"Error posting to ThingBoard: {e}")
 
 if __name__ == "__main__":
-    log_file_path = r'C:\Program Files\Core Temp\CT-Log 2024-09-11 09-03-47.csv'
+    log_file_path = r'C:\Program Files\Core Temp\CT-Log 2024-09-12 00-27-16.csv'
     connect_mqtt()
     try:
         while True:
